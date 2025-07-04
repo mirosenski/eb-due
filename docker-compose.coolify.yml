@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  eb-due-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: eb-due-frontend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=${VITE_API_URL:-http://eb-due-backend:3001}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - eb-due-network
+      - coolify
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.eb-due-frontend.rule=Host(`eb-due.mirosens.com`)"
+      - "traefik.http.services.eb-due-frontend.loadbalancer.server.port=80"
+      - "traefik.docker.network=coolify"
+      - "traefik.http.services.eb-due-frontend.loadbalancer.server.scheme=http"
+      - "traefik.http.services.eb-due-frontend.loadbalancer.healthcheck.path=/"
+      - "traefik.http.services.eb-due-frontend.loadbalancer.healthcheck.interval=30s"
+
+  eb-due-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.coolify
+    container_name: eb-due-backend
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - eb-due-network
+      - coolify
+    volumes:
+      - ./backend/data:/app/data
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.eb-due-backend.rule=Host(`api.eb-due.mirosens.com`)"
+      - "traefik.http.services.eb-due-backend.loadbalancer.server.port=3001"
+      - "traefik.docker.network=coolify"
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: eb-due-postgres
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-eb_due_db}
+      - POSTGRES_USER=${POSTGRES_USER:-eb_due_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-eb_due_secure_password_2024}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - eb-due-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-eb_due_user} -d ${POSTGRES_DB:-eb_due_db} || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  eb-due-network:
+    driver: bridge
+  coolify:
+    external: true 

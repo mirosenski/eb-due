@@ -1,0 +1,31 @@
+services:
+  eb-due-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: eb-due-frontend
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://eb-due-backend:3001}
+      - VITE_APP_TITLE=EB-Due
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - eb-due-network
+      - coolify
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.eb-due-frontend.rule=Host(`eb-due.mirosens.com`)"
+      - "traefik.http.services.eb-due-frontend.loadbalancer.server.port=80"
+      - "traefik.docker.network=coolify"
+
+networks:
+  eb-due-network:
+    driver: bridge
+  coolify:
+    external: true 
