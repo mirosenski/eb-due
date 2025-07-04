@@ -98,7 +98,7 @@ case $category in
     5)
         echo -e "\n${YELLOW}🚀 Deployment-Skripte bereinigen:${NC}"
         echo -e "${BLUE}Hinweis: Überprüfe, welche Deployment-Methoden du verwendest${NC}"
-        safe_delete "deploy-vercel.sh" "Vercel Deployment-Skript (falls du es nicht verwendest)"
+        echo "Vercel-Dateien wurden bereits entfernt"
         safe_delete "deploy-coolify.sh" "Coolify Deployment-Skript (falls du es nicht verwendest)"
         ;;
     6)
