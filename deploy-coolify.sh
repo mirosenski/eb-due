@@ -80,7 +80,7 @@ if [ $? -eq 0 ]; then
     echo "📊 Deployment Details:"
     echo "   Projekt: $PROJECT_NAME"
     echo "   Domain: eb-due-gh.mirosens.com"
-    echo "   Port: 3001"
+    echo "   Port: 3003"
     echo "   Environment: Production"
     echo ""
     echo "🔗 URLs:"
