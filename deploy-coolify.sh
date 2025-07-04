@@ -54,16 +54,16 @@ cat > coolify-config.json << EOF
     "DB_PORT": "5432",
     "DB_NAME": "eb-due",
     "JWT_SECRET": "$JWT_SECRET",
-    "FRONTEND_URL": "https://eb-due.mirosens.com",
-    "CORS_ORIGIN": "https://eb-due.mirosens.com,https://www.eb-due.mirosens.com",
+    "FRONTEND_URL": "https://eb-due-gh.mirosens.com",
+    "CORS_ORIGIN": "https://eb-due-gh.mirosens.com,https://www.eb-due-gh.mirosens.com",
     "OSRM_URL": "http://osrm:5000",
     "VALHALLA_URL": "http://valhalla:8002",
     "NOMINATIM_URL": "http://nominatim:8080",
     "REDIS_URL": "redis://redis:6379"
   },
   "domains": [
-    "eb-due.mirosens.com",
-    "www.eb-due.mirosens.com"
+    "eb-due-gh.mirosens.com",
+    "www.eb-due-gh.mirosens.com"
   ]
 }
 EOF
@@ -79,14 +79,14 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "📊 Deployment Details:"
     echo "   Projekt: $PROJECT_NAME"
-    echo "   Domain: eb-due.mirosens.com"
+    echo "   Domain: eb-due-gh.mirosens.com"
     echo "   Port: 3001"
     echo "   Environment: Production"
     echo ""
     echo "🔗 URLs:"
-    echo "   Frontend: https://eb-due.mirosens.com"
-    echo "   API: https://eb-due.mirosens.com/api"
-    echo "   Health: https://eb-due.mirosens.com/health"
+    echo "   Frontend: https://eb-due-gh.mirosens.com"
+    echo "   API: https://eb-due-gh.mirosens.com/api"
+    echo "   Health: https://eb-due-gh.mirosens.com/health"
     echo ""
     echo "🗄️ Datenbank:"
     echo "   Name: eb-due-db"
@@ -94,7 +94,7 @@ if [ $? -eq 0 ]; then
     echo "   Port: 5432"
     echo "   User: eb-due"
     echo ""
-    echo "🌐 Domain: eb-due.mirosens.com"
+    echo "🌐 Domain: eb-due-gh.mirosens.com"
     echo ""
     echo "✅ Deployment abgeschlossen!"
 else

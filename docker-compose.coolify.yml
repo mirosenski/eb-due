@@ -21,7 +21,7 @@ services:
       - coolify
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.eb-due-frontend.rule=Host(`eb-due.mirosens.com`)"
+      - "traefik.http.routers.eb-due-frontend.rule=Host(`eb-due-gh.mirosens.com`)"
       - "traefik.http.services.eb-due-frontend.loadbalancer.server.port=80"
       - "traefik.docker.network=coolify"
       - "traefik.http.services.eb-due-frontend.loadbalancer.server.scheme=http"
@@ -58,7 +58,7 @@ services:
       start_period: 60s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.eb-due-backend.rule=Host(`api.eb-due.mirosens.com`)"
+      - "traefik.http.routers.eb-due-backend.rule=Host(`api.eb-due-gh.mirosens.com`)"
       - "traefik.http.services.eb-due-backend.loadbalancer.server.port=3001"
       - "traefik.docker.network=coolify"
 

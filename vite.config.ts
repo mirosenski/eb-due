@@ -13,7 +13,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://eb-due.mirosens.com',
+        target: 'https://eb-due-gh.mirosens.com',
         changeOrigin: true,
         secure: true
       }

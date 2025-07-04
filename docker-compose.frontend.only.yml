@@ -20,7 +20,7 @@ services:
       start_period: 40s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.eb-due-frontend.rule=Host(`eb-due.mirosens.com`)"
+      - "traefik.http.routers.eb-due-frontend.rule=Host(`eb-due-gh.mirosens.com`)"
       - "traefik.http.services.eb-due-frontend.loadbalancer.server.port=80"
       - "traefik.docker.network=coolify"
 
