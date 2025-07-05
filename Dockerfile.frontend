@@ -25,6 +25,12 @@ FROM nginx:alpine
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init
 
+# Grant CAP_NET_BIND_SERVICE so nginx can bind to port 80 while running as a
+# non-root user. An alternative would be to remove the USER directive and run
+# the container as root.
+RUN apk add --no-cache libcap \
+    && setcap 'cap_net_bind_service=+ep' /usr/sbin/nginx
+
 # Copy built files
 COPY --from=builder /app/dist /usr/share/nginx/html
 
@@ -37,7 +43,8 @@ RUN adduser -S frontend -u 1001 -G nginx
 # Change ownership
 RUN chown -R frontend:nginx /usr/share/nginx/html /var/cache/nginx /var/log/nginx /etc/nginx/conf.d
 
-# Switch to non-root user
+# Switch to non-root user. CAP_NET_BIND_SERVICE capability has been set on
+# the nginx binary above so this user can bind to port 80.
 USER frontend
 
 # Expose port
