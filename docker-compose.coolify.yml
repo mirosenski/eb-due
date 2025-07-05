@@ -9,7 +9,7 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-      - VITE_API_URL=${VITE_API_URL:-http://eb-due-backend:3001}
+      - VITE_API_URL=${VITE_API_URL:-http://eb-due-backend:3003}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80/"]
       interval: 30s
@@ -35,7 +35,7 @@ services:
     container_name: eb-due-backend
     environment:
       - NODE_ENV=production
-      - PORT=3001
+      - PORT=3003
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET=${JWT_SECRET}
       - CORS_ORIGIN=${CORS_ORIGIN}
@@ -49,9 +49,9 @@ services:
     volumes:
       - ./backend/data:/app/data
     ports:
-      - "3001:3001"
+      - "3003:3003"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3003/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -59,7 +59,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.eb-due-backend.rule=Host(`api.eb-due.mirosens.com`)"
-      - "traefik.http.services.eb-due-backend.loadbalancer.server.port=3001"
+      - "traefik.http.services.eb-due-backend.loadbalancer.server.port=3003"
       - "traefik.docker.network=coolify"
 
   postgres:

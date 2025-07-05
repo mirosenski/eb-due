@@ -1,68 +1,75 @@
 #!/bin/bash
 
-echo "=== EB-Due Coolify Debug Script ==="
-echo ""
+# Debug-Script für Coolify Port-Konflikte
+# Hilft bei der Diagnose von Port-Problemen
 
-echo "1. Container Status:"
-echo "==================="
-docker ps -a | grep eb-due
-echo ""
+set -e
 
-echo "2. Laufende Container:"
-echo "====================="
-docker ps | grep eb-due
-echo ""
+# Farben für Output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
 
-echo "3. Frontend Container Logs (letzte 50 Zeilen):"
-echo "============================================="
-if docker ps | grep -q eb-due-frontend; then
-    docker logs --tail 50 eb-due-frontend
+echo -e "${BLUE}🔍 Coolify Port-Diagnose${NC}"
+echo "================================"
+
+# Prüfe Port 3001
+echo -e "${BLUE}📡 Prüfe Port 3001...${NC}"
+if lsof -i :3001 > /dev/null 2>&1; then
+    echo -e "${RED}❌ Port 3001 ist belegt!${NC}"
+    echo "Aktive Verbindungen:"
+    lsof -i :3001
+    echo ""
+    echo -e "${YELLOW}💡 Lösung: Verwende Port 3003${NC}"
 else
-    echo "Frontend Container läuft nicht!"
+    echo -e "${GREEN}✅ Port 3001 ist frei${NC}"
 fi
-echo ""
 
-echo "4. Backend Container Logs (letzte 50 Zeilen):"
-echo "============================================"
-if docker ps | grep -q eb-due-backend; then
-    docker logs --tail 50 eb-due-backend
+# Prüfe Port 3003
+echo -e "${BLUE}📡 Prüfe Port 3003...${NC}"
+if lsof -i :3003 > /dev/null 2>&1; then
+    echo -e "${RED}❌ Port 3003 ist belegt!${NC}"
+    echo "Aktive Verbindungen:"
+    lsof -i :3003
 else
-    echo "Backend Container läuft nicht!"
+    echo -e "${GREEN}✅ Port 3003 ist frei${NC}"
 fi
-echo ""
 
-echo "5. Netzwerk-Informationen:"
-echo "========================="
-docker network ls | grep -E "(eb-due|coolify)"
-echo ""
-
-echo "6. Frontend Container Details:"
-echo "============================="
-if docker ps | grep -q eb-due-frontend; then
-    docker inspect eb-due-frontend | grep -A 10 -B 5 "NetworkMode\|PortBindings\|Health"
+# Prüfe Docker Container
+echo -e "${BLUE}🐳 Prüfe Docker Container...${NC}"
+if docker ps --format "table {{.Names}}\t{{.Ports}}" | grep -E "(3001|3003)"; then
+    echo -e "${YELLOW}⚠️  Docker Container mit diesen Ports gefunden:${NC}"
+    docker ps --format "table {{.Names}}\t{{.Ports}}" | grep -E "(3001|3003)"
 else
-    echo "Frontend Container nicht gefunden!"
+    echo -e "${GREEN}✅ Keine Docker Container mit diesen Ports${NC}"
 fi
-echo ""
 
-echo "7. Teste Frontend lokal (falls Container läuft):"
-echo "==============================================="
-if docker ps | grep -q eb-due-frontend; then
-    echo "Versuche curl zu localhost:80..."
-    docker exec eb-due-frontend wget -q -O- http://localhost:80/ | head -5
+# Prüfe Coolify Services
+echo -e "${BLUE}☁️  Prüfe Coolify Services...${NC}"
+if command -v coolify &> /dev/null; then
+    if coolify whoami &> /dev/null; then
+        echo -e "${GREEN}✅ Coolify CLI verfügbar und eingeloggt${NC}"
+        echo "Verfügbare Services:"
+        coolify app list 2>/dev/null || echo "Keine Services gefunden"
+    else
+        echo -e "${YELLOW}⚠️  Coolify CLI nicht eingeloggt${NC}"
+    fi
 else
-    echo "Frontend Container läuft nicht!"
+    echo -e "${RED}❌ Coolify CLI nicht installiert${NC}"
 fi
-echo ""
 
-echo "8. Coolify Netzwerk Test:"
-echo "========================"
-if docker network ls | grep -q coolify; then
-    echo "Coolify Netzwerk gefunden"
-    docker network inspect coolify | grep -A 5 -B 5 "Containers"
-else
-    echo "Coolify Netzwerk nicht gefunden!"
-fi
+# Empfehlungen
 echo ""
-
-echo "Debug abgeschlossen!" 
+echo -e "${BLUE}💡 Empfehlungen:${NC}"
+echo "=================="
+echo "1. Verwende Port 3003 für das Backend"
+echo "2. Stelle sicher, dass alle Konfigurationsdateien aktualisiert sind:"
+echo "   - docker-compose.coolify.yml"
+echo "   - backend/Dockerfile.coolify"
+echo "   - env.coolify.example"
+echo "3. Starte das Deployment neu mit:"
+echo "   ./deploy-coolify.sh"
+echo ""
+echo -e "${GREEN}✅ Diagnose abgeschlossen!${NC}" 

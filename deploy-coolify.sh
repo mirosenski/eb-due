@@ -1,109 +1,117 @@
 #!/bin/bash
 
 # Coolify Deployment Script für eb-due
-# Automatisiertes Deployment für die eb-due Anwendung
+# Dieses Script erstellt und deployt die Anwendung in Coolify
 
-echo "🚀 Coolify Deployment für eb-due wird gestartet..."
+set -e
+
+# Farben für Output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Konfiguration
+PROJECT_NAME="eb-due"
+REPO_URL="https://github.com/mirosens/eb-due.git"
+BRANCH="main"
+
+echo -e "${BLUE}🚀 Coolify Deployment für eb-due${NC}"
+echo "=================================="
 
 # Prüfe ob Coolify CLI installiert ist
 if ! command -v coolify &> /dev/null; then
-    echo "❌ Coolify CLI ist nicht installiert. Bitte installieren Sie es zuerst."
+    echo -e "${RED}❌ Coolify CLI ist nicht installiert${NC}"
+    echo "Installiere mit: curl -fsSL https://cdn.coollabs.io/coolify/install.sh | bash"
     exit 1
 fi
 
-# Prüfe ob .env Datei existiert
-if [ ! -f ".env" ]; then
-    echo "❌ .env Datei nicht gefunden. Bitte erstellen Sie eine .env Datei basierend auf env.coolify.example"
+# Prüfe ob wir eingeloggt sind
+if ! coolify whoami &> /dev/null; then
+    echo -e "${YELLOW}⚠️  Nicht bei Coolify eingeloggt${NC}"
+    echo "Bitte logge dich ein mit: coolify login"
     exit 1
 fi
 
-# Lade Umgebungsvariablen
-source .env
+echo -e "${GREEN}✅ Coolify CLI verfügbar${NC}"
 
-# Prüfe erforderliche Variablen
-required_vars=("COOLIFY_URL" "COOLIFY_TOKEN" "PROJECT_NAME")
-for var in "${required_vars[@]}"; do
-    if [ -z "${!var}" ]; then
-        echo "❌ Erforderliche Umgebungsvariable $var ist nicht gesetzt"
-        exit 1
-    fi
-done
+# Erstelle oder aktualisiere das Projekt
+echo -e "${BLUE}📦 Erstelle/aktualisiere Projekt in Coolify...${NC}"
 
-echo "✅ Umgebungsvariablen geladen"
-echo "🌐 Coolify URL: $COOLIFY_URL"
-echo "📦 Projekt: $PROJECT_NAME"
+# Erstelle die Anwendung in Coolify
+coolify app create \
+    --name "$PROJECT_NAME" \
+    --repository "$REPO_URL" \
+    --branch "$BRANCH" \
+    --buildPack "dockerfile" \
+    --dockerfilePath "backend/Dockerfile.coolify" \
+    --port 3003 \
+    --environmentVariables "NODE_ENV=production,PORT=3003" \
+    --healthCheckPath "/api/health" \
+    --healthCheckPort 3003
 
-# Erstelle temporäre Konfigurationsdatei
-cat > coolify-config.json << EOF
-{
-  "name": "$PROJECT_NAME",
-  "type": "application",
-  "repository": {
-    "url": "$REPOSITORY_URL",
-    "branch": "main"
-  },
-  "buildPack": "nixpacks",
-  "port": 3001,
-  "environment": {
-    "NODE_ENV": "production",
-    "PORT": "3001",
-    "DATABASE_URL": "postgresql://eb-due:eb-due_secure_password_2024@postgres:5432/eb-due",
-    "DB_USER": "eb-due",
-    "DB_PASSWORD": "eb-due_secure_password_2024",
-    "DB_HOST": "postgres",
-    "DB_PORT": "5432",
-    "DB_NAME": "eb-due",
-    "JWT_SECRET": "$JWT_SECRET",
-    "FRONTEND_URL": "https://eb-due.mirosens.com",
-    "CORS_ORIGIN": "https://eb-due.mirosens.com,https://www.eb-due.mirosens.com",
-    "OSRM_URL": "http://osrm:5000",
-    "VALHALLA_URL": "http://valhalla:8002",
-    "NOMINATIM_URL": "http://nominatim:8080",
-    "REDIS_URL": "redis://redis:6379"
-  },
-  "domains": [
-    "eb-due.mirosens.com",
-    "www.eb-due.mirosens.com"
-  ]
-}
-EOF
+echo -e "${GREEN}✅ Projekt erstellt/aktualisiert${NC}"
 
-echo "📋 Konfiguration erstellt"
+# Erstelle die Datenbank
+echo -e "${BLUE}🗄️  Erstelle PostgreSQL Datenbank...${NC}"
 
-# Deploye Anwendung
-echo "🚀 Starte Deployment..."
-coolify deploy --config coolify-config.json
+coolify database create \
+    --name "${PROJECT_NAME}-postgres" \
+    --type "postgresql" \
+    --version "15" \
+    --environmentVariables "POSTGRES_DB=eb_due_db,POSTGRES_USER=eb_due_user,POSTGRES_PASSWORD=eb_due_secure_password_2024"
 
-if [ $? -eq 0 ]; then
-    echo "✅ Deployment erfolgreich!"
-    echo ""
-    echo "📊 Deployment Details:"
-    echo "   Projekt: $PROJECT_NAME"
-    echo "   Domain: eb-due.mirosens.com"
-    echo "   Port: 3001"
-    echo "   Environment: Production"
-    echo ""
-    echo "🔗 URLs:"
-    echo "   Frontend: https://eb-due.mirosens.com"
-    echo "   API: https://eb-due.mirosens.com/api"
-    echo "   Health: https://eb-due.mirosens.com/health"
-    echo ""
-    echo "🗄️ Datenbank:"
-    echo "   Name: eb-due-db"
-    echo "   Host: postgres"
-    echo "   Port: 5432"
-    echo "   User: eb-due"
-    echo ""
-    echo "🌐 Domain: eb-due.mirosens.com"
-    echo ""
-    echo "✅ Deployment abgeschlossen!"
-else
-    echo "❌ Deployment fehlgeschlagen"
-    exit 1
-fi
+echo -e "${GREEN}✅ Datenbank erstellt${NC}"
 
-# Cleanup
-rm -f coolify-config.json
+# Erstelle das Frontend
+echo -e "${BLUE}🌐 Erstelle Frontend...${NC}"
 
-echo "🧹 Temporäre Dateien aufgeräumt"
-echo "🎉 Deployment-Prozess abgeschlossen!" 
+coolify app create \
+    --name "${PROJECT_NAME}-frontend" \
+    --repository "$REPO_URL" \
+    --branch "$BRANCH" \
+    --buildPack "dockerfile" \
+    --dockerfilePath "Dockerfile.frontend" \
+    --port 80 \
+    --environmentVariables "NODE_ENV=production,VITE_API_URL=http://${PROJECT_NAME}-backend:3003" \
+    --healthCheckPath "/" \
+    --healthCheckPort 80
+
+echo -e "${GREEN}✅ Frontend erstellt${NC}"
+
+# Deploy die Anwendungen
+echo -e "${BLUE}🚀 Starte Deployment...${NC}"
+
+# Deploy Backend
+echo -e "${YELLOW}📦 Deploye Backend...${NC}"
+coolify app deploy --name "$PROJECT_NAME"
+
+# Deploy Frontend
+echo -e "${YELLOW}🌐 Deploye Frontend...${NC}"
+coolify app deploy --name "${PROJECT_NAME}-frontend"
+
+echo -e "${GREEN}✅ Deployment abgeschlossen!${NC}"
+
+# Zeige Status
+echo -e "${BLUE}📊 Deployment Status:${NC}"
+echo "=================================="
+echo -e "${GREEN}Backend:${NC}"
+echo "   Name: $PROJECT_NAME"
+echo "   Port: 3003"
+echo "   Health: /api/health"
+echo ""
+echo -e "${GREEN}Frontend:${NC}"
+echo "   Name: ${PROJECT_NAME}-frontend"
+echo "   Port: 80"
+echo "   Health: /"
+echo ""
+echo -e "${GREEN}Datenbank:${NC}"
+echo "   Name: ${PROJECT_NAME}-postgres"
+echo "   Type: PostgreSQL 15"
+echo ""
+echo -e "${BLUE}🔗 URLs:${NC}"
+echo "   Frontend: https://eb-due.mirosens.com"
+echo "   Backend API: https://api.eb-due.mirosens.com"
+echo ""
+echo -e "${GREEN}🎉 Deployment erfolgreich!${NC}" 
