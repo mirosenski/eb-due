@@ -1,0 +1,22 @@
+# Exclude dependencies and build output
+node_modules
+.pnpm-store
+dist
+build
+.next
+out
+
+# Logs
+*.log
+logs
+
+# Backend source not needed for frontend image
+backend
+
+# Local scripts
+start-all.sh
+install-coolify.sh
+debug-coolify.sh
+
+# VCS
+.git
