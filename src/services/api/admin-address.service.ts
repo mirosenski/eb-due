@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { isValidJsonResponse, createAddressStatsFallback, validateAddressesArray } from '@/utils/api-helpers'
 
 // Verwende die korrekte API-URL für Adressen
 const API_URL = '/api/addresses'
@@ -53,11 +54,22 @@ export const adminAddressService = {
   async getAllAddresses(): Promise<Address[]> {
     try {
       const response = await axios.get(API_URL)
+      
+      // Sicherheitscheck: Stelle sicher, dass die Antwort JSON ist
+      if (!isValidJsonResponse(response.data)) {
+        console.warn('⚠️ API gibt ungültige Antwort zurück, verwende leeres Array');
+        return [];
+      }
+      
       // Die API gibt bereits die korrekte Struktur zurück
-      return response.data.addresses || response.data || []
+      const addresses = response.data.addresses || response.data || [];
+      
+      // Validiere das Array
+      return validateAddressesArray(addresses);
     } catch (error) {
       console.error('Fehler beim Laden der Adressen:', error)
-      throw error
+      // Fallback: Leeres Array zurückgeben statt Fehler zu werfen
+      return [];
     }
   },
 
@@ -166,10 +178,19 @@ export const adminAddressService = {
   async getAddressStats(): Promise<any> {
     try {
       const response = await axios.get(`${API_URL}/admin/stats`)
+      
+      // Sicherheitscheck: Stelle sicher, dass die Antwort JSON ist
+      if (!isValidJsonResponse(response.data)) {
+        console.warn('⚠️ API gibt ungültige Antwort zurück, verwende Fallback-Daten');
+        return createAddressStatsFallback();
+      }
+      
       return response.data
     } catch (error) {
       console.error('Fehler beim Laden der Adress-Statistiken:', error)
-      throw error
+      
+      // Fallback-Daten zurückgeben statt Fehler zu werfen
+      return createAddressStatsFallback();
     }
   }
 }

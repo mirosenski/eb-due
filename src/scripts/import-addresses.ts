@@ -11,6 +11,7 @@ import { ravensburgAddresses } from '../data/ravensburg-addresses';
 import { reutlingenAddresses } from '../data/reutlingen-addresses';
 import { ulmAddresses } from '../data/ulm-addresses';
 import { aalenAddresses } from '../data/aalen-addresses';
+import { safeFetch } from '@/utils/api-helpers';
 
 interface AddressData {
   name: string;
@@ -118,15 +119,9 @@ export const showAddressStats = () => {
 // Funktion zum Testen der API-Verbindung
 export const testAPIConnection = async () => {
   try {
-    const response = await fetch('/api/stationen');
-    if (response.ok) {
-      const stations = await response.json();
-      console.log(`✅ API-Verbindung OK. Aktuell ${stations.length} Stationen in der Datenbank.`);
-      return stations.length;
-    } else {
-      console.error('❌ API-Verbindung fehlgeschlagen:', response.status);
-      return 0;
-    }
+    const stations = await safeFetch('/api/stationen');
+    console.log(`✅ API-Verbindung OK. Aktuell ${stations.length} Stationen in der Datenbank.`);
+    return stations.length;
   } catch (error) {
     console.error('❌ API-Verbindung fehlgeschlagen:', error);
     return 0;
@@ -136,17 +131,8 @@ export const testAPIConnection = async () => {
 // Funktion zum Leeren der Datenbank
 export const clearDatabase = async () => {
   try {
-    const stationResponse = await fetch('/api/stationen', { method: 'DELETE' });
-    const addressResponse = await fetch('/api/addresses', { method: 'DELETE' });
-    
-    // Sichere JSON-Parsing mit Fallback
-    const stationResult = stationResponse.ok 
-      ? await stationResponse.json().catch(() => ({ deletedCount: 0 }))
-      : { deletedCount: 0 };
-    
-    const addressResult = addressResponse.ok 
-      ? await addressResponse.json().catch(() => ({ deletedCount: 0 }))
-      : { deletedCount: 0 };
+    const stationResult = await safeFetch('/api/stationen', { method: 'DELETE' }).catch(() => ({ deletedCount: 0 }));
+    const addressResult = await safeFetch('/api/addresses', { method: 'DELETE' }).catch(() => ({ deletedCount: 0 }));
     
     console.log(`🗑️ Datenbank geleert: ${stationResult.deletedCount} Stationen, ${addressResult.deletedCount} Adressen gelöscht`);
     return { stationCount: stationResult.deletedCount, addressCount: addressResult.deletedCount };

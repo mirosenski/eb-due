@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { Station } from '@/types/station.types';
 import { fetchStations } from '@/services/api/backend-api.service';
 import { createStation, updateStation, deleteStation } from '@/services/api/admin-station.service';
+import { validateStationsArray } from '@/utils/api-helpers';
 
 export interface AdminStats {
   totalStations: number;
@@ -108,9 +109,12 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       // Sicherheitscheck: Stelle sicher, dass stations ein Array ist
       const safeStations = Array.isArray(stations) ? stations : [];
       
+      // Validiere die Stationen
+      const validStations = validateStationsArray(safeStations);
+      
       set({
-        allStations: safeStations,
-        filteredStations: safeStations,
+        allStations: validStations,
+        filteredStations: validStations,
         isLoading: false
       });
       
@@ -367,7 +371,9 @@ export const useAdminStore = create<AdminState>((set, get) => ({
       return [];
     }
     
-    let filtered = [...allStations];
+    // Validiere die Stationen
+    const validStations = validateStationsArray(allStations);
+    let filtered = [...validStations];
     
     // Apply search filter
     if (searchQuery) {

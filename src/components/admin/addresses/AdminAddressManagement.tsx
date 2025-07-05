@@ -10,6 +10,7 @@ import AddressModal from './AddressModal'
 import AddressFilters from './AddressFilters'
 import { motion } from 'framer-motion'
 import ConvertToStationModal from './ConvertToStationModal'
+import { createAddressStatsFallback, safeFetch } from '@/utils/api-helpers'
 
 type AddressTab = 'station' | 'user' | 'temporary'
 
@@ -112,13 +113,12 @@ const AdminAddressManagement: React.FC = () => {
 
   const loadStats = async () => {
     try {
-      const response = await fetch('/api/addresses/stats')
-      if (response.ok) {
-        const data = await response.json()
-        setStats(data)
-      }
+      const data = await safeFetch('/api/addresses/stats');
+      setStats(data);
     } catch (error) {
       console.error('Fehler beim Laden der Statistiken:', error)
+      // Fallback-Daten setzen statt Fehler zu werfen
+      setStats(createAddressStatsFallback());
     }
   }
 

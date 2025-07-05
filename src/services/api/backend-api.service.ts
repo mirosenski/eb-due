@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { Station } from '@/types/station.types'
+import { isValidJsonResponse, validateStationsArray } from '@/utils/api-helpers'
 
 // Verwende Vite Proxy statt direkter Backend-URL
 const API_URL = '/api/stationen'
@@ -49,11 +50,21 @@ export const fetchStations = async (params = {}): Promise<Station[]> => {
         }
       });
       
+      // Sicherheitscheck: Stelle sicher, dass die Antwort JSON ist
+      if (!isValidJsonResponse(response.data)) {
+        console.warn('⚠️ Backend gibt ungültige Antwort zurück, verwende lokale Daten');
+        throw new Error('Backend gibt ungültige Antwort zurück');
+      }
+      
       if (response.data) {
         const stations = response.data.stations || response.data;
-        if (Array.isArray(stations)) {
-          console.log('✅ Backend Stationen geladen:', stations.length, 'Stationen');
-          return stations;
+        const validStations = validateStationsArray(stations);
+        if (validStations.length > 0) {
+          console.log('✅ Backend Stationen geladen:', validStations.length, 'Stationen');
+          return validStations;
+        } else {
+          console.warn('⚠️ Backend gibt keine gültigen Stationen zurück, verwende lokale Daten');
+          throw new Error('Backend gibt keine gültigen Stationen zurück');
         }
       }
     } catch (backendError) {
