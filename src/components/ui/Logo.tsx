@@ -60,7 +60,7 @@ const Logo: React.FC<LogoProps> = ({
 			transition={{ duration: 0.6, delay: 0.2 }}
 		>
 			<LogoIcon />
-			<div>
+			<div className="hidden sm:block">
 				<motion.h1
 					className={`font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent ${textSizes[size]}`}
 					animate={

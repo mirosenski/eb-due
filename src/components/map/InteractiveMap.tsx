@@ -45,6 +45,9 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
   const [trafficEnabled, setTrafficEnabled] = useState(false);
   const [clustersEnabled, setClustersEnabled] = useState(true);
 
+  // Hilfsfunktion für echte Routen
+  const echteRouten = routeResults.filter(route => !route.route?.isFallback);
+
   // Map styles
   const mapStyles = {
     streets: {
@@ -146,7 +149,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
     });
 
     // Add route sources for each route
-    routeResults.forEach((route) => {
+    echteRouten.forEach((route) => {
       // Sicherstellen, dass die Route-ID gültig ist
       if (!route.id || route.id === 'undefined' || route.id === 'null' || isNaN(Number(route.id))) {
         console.warn('Invalid route ID:', route.id, 'for route:', route.destinationName);
@@ -302,7 +305,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
       .addTo(map.current);
 
     // Add destination markers
-    routeResults.forEach((route) => {
+    echteRouten.forEach((route) => {
       const markerElement = document.createElement('div');
       markerElement.className = 'destination-marker';
       

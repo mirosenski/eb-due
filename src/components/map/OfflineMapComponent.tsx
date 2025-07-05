@@ -234,6 +234,9 @@ const OfflineMapComponent: React.FC<OfflineMapComponentProps> = ({
     }
   }, [map, mapLoaded]);
 
+  // Hilfsfunktion für echte Routen
+  const echteRouten = routeResults.filter(route => !route.route?.isFallback);
+
   // Add route markers
   const addRouteMarkers = useCallback(() => {
     if (!map.current || !mapLoaded) return;
@@ -253,7 +256,7 @@ const OfflineMapComponent: React.FC<OfflineMapComponentProps> = ({
       .addTo(map.current);
 
     // Add destination markers
-    routeResults.forEach((route) => {
+    echteRouten.forEach((route) => {
       const marker = new Marker({
         color: route.color,
         scale: 1.0
@@ -274,21 +277,21 @@ const OfflineMapComponent: React.FC<OfflineMapComponentProps> = ({
     });
 
     // Fit map to show all markers
-    if (routeResults.length > 0) {
+    if (echteRouten.length > 0) {
       const bounds = new LngLatBounds();
       bounds.extend([startCoordinates.lng, startCoordinates.lat]);
-      routeResults.forEach(route => {
+      echteRouten.forEach(route => {
         bounds.extend([route.coordinates.lng, route.coordinates.lat]);
       });
       map.current.fitBounds(bounds, { padding: 50 });
     }
-  }, [map, mapLoaded, routeResults, startCoordinates, startAddress]);
+  }, [map, mapLoaded, echteRouten, startCoordinates, startAddress]);
 
   // Add route lines
   const addRouteLines = useCallback(async () => {
     if (!map.current || !mapLoaded) return;
 
-    for (const route of routeResults) {
+    for (const route of echteRouten) {
       try {
         // Calculate route using offline service
         const routeData = await offlineMapService.calculateRoute({
@@ -341,7 +344,7 @@ const OfflineMapComponent: React.FC<OfflineMapComponentProps> = ({
         console.error(`Failed to add route line for ${route.id}:`, error);
       }
     }
-  }, [map, mapLoaded, routeResults, startCoordinates, routeVisibility]);
+  }, [map, mapLoaded, echteRouten, startCoordinates, routeVisibility]);
 
   // Parse route shape (simple implementation)
   const parseRouteShape = (shape: string): number[][] => {
@@ -427,7 +430,7 @@ const OfflineMapComponent: React.FC<OfflineMapComponentProps> = ({
 
   // Recalculate route with different profile
   const recalculateRoute = async (routeId: string, profileId: string) => {
-    const route = routeResults.find(r => r.id === routeId);
+    const route = echteRouten.find(r => r.id === routeId);
     if (!route || !onRouteRecalculate) return;
 
     try {
@@ -564,7 +567,7 @@ const OfflineMapComponent: React.FC<OfflineMapComponentProps> = ({
           Routen-Legende
         </h3>
         <div className="space-y-2 max-h-40 overflow-y-auto">
-          {routeResults.map((route) => (
+          {echteRouten.map((route) => (
             <div key={route.id} className="flex items-center space-x-3">
               <button
                 onClick={() => toggleRouteVisibility(route.id)}
