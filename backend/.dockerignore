@@ -1,0 +1,17 @@
+# Exclude dependencies and build output
+node_modules
+dist
+build
+
+# Logs
+*.log
+logs
+
+# Test files
+tests
+
+# Local scripts
+*.sh
+
+# VCS
+.git
