@@ -1,0 +1,75 @@
+# Multi-stage build für Coolify Deployment
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Copy package files
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Clear npm cache and install dependencies with multiple fallback strategies
+RUN npm cache clean --force && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set strict-ssl false && \
+    (npm ci --no-audit --no-fund || \
+     (npm cache clean --force && npm ci --no-audit --no-fund --prefer-offline) || \
+     (npm cache clean --force && npm install --no-audit --no-fund))
+
+# Copy source code
+COPY . .
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Production stage
+FROM node:18-alpine AS production
+
+WORKDIR /app
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Copy package files
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Clear npm cache and install only production dependencies with multiple fallback strategies
+RUN npm cache clean --force && \
+    npm config set registry https://registry.npmjs.org/ && \
+    npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
+    npm config set strict-ssl false && \
+    (npm ci --only=production --no-audit --no-fund || \
+     (npm cache clean --force && npm ci --only=production --no-audit --no-fund --prefer-offline) || \
+     (npm cache clean --force && npm install --only=production --no-audit --no-fund))
+
+# Copy application from builder stage
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/simple-server.js ./
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S backend -u 1001
+
+# Change ownership of app directory
+RUN chown -R backend:nodejs /app
+USER backend
+
+# Expose port
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3001/api/stationen', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+
+# Start the application mit Migration
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"] 

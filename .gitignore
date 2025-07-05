@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Environment variables (aber .env.example committen!)
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Logs
+*.log
+logs/
+backend.log
+
+# Runtime
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Testing
+coverage/
+.nyc_output/
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+.rpt2_cache/
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database (aber schema committen!)
+*.db
+*.sqlite
+*.sqlite3
+!prisma/schema.prisma
+
+# Prisma migrations (optional committen)
+prisma/migrations/
+
+# Temp
+tmp/
+temp/

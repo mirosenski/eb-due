@@ -1,0 +1,90 @@
+{
+  "name": "eb-due - Entfernungsberechnung Dienststellen und -einrichtungen",
+  "short_name": "eb-due",
+  "description": "Professionelle Routing-Anwendung für Dienststellen und Einrichtungen in Baden-Württemberg",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e40af",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "de",
+  "categories": ["navigation", "utilities", "business"],
+  "icons": [
+    {
+      "src": "/icons/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/favicon-310x310.png",
+      "sizes": "310x310",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "eb-due Desktop Ansicht"
+    },
+    {
+      "src": "/images/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "eb-due Mobile Ansicht"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Neue Route",
+      "short_name": "Route",
+      "description": "Neue Route erstellen",
+      "url": "/?action=new-route",
+      "icons": [
+        {
+          "src": "/icons/route-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Admin-Bereich",
+      "short_name": "Admin",
+      "description": "Admin-Bereich öffnen",
+      "url": "/admin",
+      "icons": [
+        {
+          "src": "/icons/admin-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "handle_links": "preferred",
+  "protocol_handlers": [
+    {
+      "protocol": "web+eb-due",
+      "url": "/?route=%s"
+    }
+  ]
+} 

@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  eb-due-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: eb-due-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=file:./data/eb-due.db
+      - JWT_SECRET=${JWT_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL}
+    volumes:
+      - ./backend/data:/app/data
+    networks:
+      - eb-due-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/stationen"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  eb-due-network:
+    driver: bridge 
