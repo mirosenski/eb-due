@@ -11,7 +11,7 @@ services:
       - NODE_ENV=production
       - VITE_API_URL=${VITE_API_URL:-http://eb-due-backend:3001}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/assets/health.txt"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -25,7 +25,7 @@ services:
       - "traefik.http.services.eb-due-frontend.loadbalancer.server.port=80"
       - "traefik.docker.network=coolify"
       - "traefik.http.services.eb-due-frontend.loadbalancer.server.scheme=http"
-      - "traefik.http.services.eb-due-frontend.loadbalancer.healthcheck.path=/"
+      - "traefik.http.services.eb-due-frontend.loadbalancer.healthcheck.path=/assets/health.txt"
       - "traefik.http.services.eb-due-frontend.loadbalancer.healthcheck.interval=30s"
 
   eb-due-backend:
