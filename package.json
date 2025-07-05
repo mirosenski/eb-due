@@ -9,10 +9,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "proxy": "node proxy.js",
-    "vercel-build": "prisma generate",
-    "vercel-dev": "vercel dev",
-    "vercel-deploy": "vercel --prod"
+    "proxy": "node proxy.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -45,7 +42,6 @@
     "@radix-ui/react-toggle-group": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.6",
     "@tanstack/react-query": "^5.81.2",
-    "@vercel/node": "^3.0.0",
     "axios": "^1.6.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
