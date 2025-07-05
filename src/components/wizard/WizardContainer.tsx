@@ -40,21 +40,18 @@ const WizardContainer: React.FC = () => {
     {
       number: 1,
       title: 'Startadresse eingeben',
-      description: 'Geben Sie Ihre Startadresse ein',
       icon: MapPin,
       completed: wizard.currentStep > 1
     },
     {
       number: 2,
       title: 'Ziele auswählen',
-      description: 'Polizeistationen und eigene Adressen',
       icon: Users,
       completed: wizard.currentStep > 2
     },
     {
       number: 3,
       title: 'Export & Ergebnisse',
-      description: 'Premium Excel Export',
       icon: Download,
       completed: wizard.currentStep > 3
     }
@@ -87,7 +84,7 @@ const WizardContainer: React.FC = () => {
         transition={{ duration: 0.4, delay: 0.1 }}
         className="mb-8"
       >
-        <div className="flex items-center justify-center space-x-8 mb-8">
+        <div className="flex items-center justify-center space-x-8 mb-8 px-4 sm:px-0">
           {steps.map((step, index) => {
             const Icon = step.icon;
             const isActive = wizard.currentStep === step.number;
@@ -135,7 +132,6 @@ const WizardContainer: React.FC = () => {
                   
                   <div className="text-center">
                     <h3 className="font-semibold text-sm">{step.title}</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{step.description}</p>
                   </div>
                 </motion.div>
                 

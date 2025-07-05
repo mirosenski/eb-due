@@ -4,6 +4,7 @@ import { Sun, Moon, LogIn, LogOut, Settings, ArrowLeft } from 'lucide-react';
 import { useAppStore } from '@/lib/store/app-store';
 import { useAuthStore } from '@/lib/store/auth-store';
 import Logo from '@/components/ui/Logo';
+import { useIsMobile } from '@/hooks/useBreakpoint';
 
 interface HeaderProps {
   onAdminLogin: () => void;
@@ -15,6 +16,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onAdminLogin, onBackToWizard, onGoToAdmin, currentView }) => {
   const { isDarkMode, toggleTheme } = useAppStore();
   const { isAuthenticated, isAdmin, logout, user } = useAuthStore();
+  const isMobile = useIsMobile();
 
   const handleLogout = () => {
     logout();
@@ -40,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({ onAdminLogin, onBackToWizard, onGoToAdm
               onBackToWizard();
             }}
           >
-            <Logo size="sm" animated={true} />
+            <Logo size={isMobile ? "md" : "sm"} animated={true} />
           </motion.div>
 
           {/* Navigation & Controls */}
@@ -80,8 +82,7 @@ const Header: React.FC<HeaderProps> = ({ onAdminLogin, onBackToWizard, onGoToAdm
                 onClick={onAdminLogin}
                 className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
               >
-                <LogIn className="h-4 w-4" />
-                <span>Als Admin anmelden</span>
+                <span>Login</span>
               </motion.button>
             ) : (
               <div className="flex items-center space-x-3">
